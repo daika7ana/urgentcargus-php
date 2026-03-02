@@ -34,7 +34,8 @@ $client = new \MNIB\UrgentCargus\Client($apiKey, $apiUri, [
 ]);
 ```
 
-Per request, you can override or append headers and timeout:
+Per request, you can override headers and timeout:
+> **Note:** `headers` values passed per request replace any matching header keys, including defaults such as auth/subscription headers.
 ```php
 $client->get('PickupLocations', [], null, [
     'headers' => [

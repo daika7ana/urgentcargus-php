@@ -9,7 +9,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use MNIB\UrgentCargus\Exception\ClientException as UrgentCargusClientException;
 use MNIB\UrgentCargus\Exception\InvalidSubscriptionException;
 use MNIB\UrgentCargus\Exception\InvalidTokenException;
-use function array_merge;
+use function array_replace;
 use function array_replace_recursive;
 use function json_decode;
 use function sprintf;
@@ -68,11 +68,13 @@ class Client implements ClientInterface
         }
 
         if (isset($options['headers']) && \is_array($options['headers'])) {
-            $headers = array_merge($headers, $options['headers']);
+            $headers = array_replace($headers, $options['headers']);
             unset($options['headers']);
         }
 
-        $requestOptions = array_replace_recursive([
+        unset($options['json']);
+
+        $requestOptions = array_replace([
             'headers' => $headers,
             'json' => $params,
         ], $options);
