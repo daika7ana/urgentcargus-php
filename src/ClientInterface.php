@@ -23,7 +23,7 @@ interface ClientInterface
      *
      * @return mixed
      */
-    public function request(string $method, string $endpoint, array $params = [], ?string $token = null);
+    public function request(string $method, string $endpoint, array $params = [], ?string $token = null, array $options = []);
 
     /**
      * Shorthand for GET request.
@@ -32,7 +32,7 @@ interface ClientInterface
      *
      * @return mixed
      */
-    public function get(string $endpoint, array $params = [], ?string $token = null);
+    public function get(string $endpoint, array $params = [], ?string $token = null, array $options = []);
 
     /**
      * Shorthand for POST request.
@@ -41,7 +41,7 @@ interface ClientInterface
      *
      * @return mixed
      */
-    public function post(string $endpoint, array $params = [], ?string $token = null);
+    public function post(string $endpoint, array $params = [], ?string $token = null, array $options = []);
 
     /**
      * Shorthand for PUT request.
@@ -50,7 +50,7 @@ interface ClientInterface
      *
      * @return mixed
      */
-    public function put(string $endpoint, array $params = [], ?string $token = null);
+    public function put(string $endpoint, array $params = [], ?string $token = null, array $options = []);
 
     /**
      * Shorthand for DELETE request.
@@ -59,7 +59,7 @@ interface ClientInterface
      *
      * @return mixed
      */
-    public function delete(string $endpoint, array $params = [], ?string $token = null);
+    public function delete(string $endpoint, array $params = [], ?string $token = null, array $options = []);
 
     public function getToken(string $username, string $password): string;
 
