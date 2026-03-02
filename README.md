@@ -24,5 +24,27 @@ $params = [
 $awbId = $client->post('Awbs', $params);
 ```
 
+You can also pass additional [Guzzle client config](https://docs.guzzlephp.org/en/stable/request-options.html) to the constructor (except `base_uri`, which is always enforced from `$apiUri` or default API uri):
+```php
+$client = new \MNIB\UrgentCargus\Client($apiKey, $apiUri, [
+    'timeout' => 30,
+    'headers' => [
+        'User-Agent' => 'MyApp/1.0',
+    ],
+]);
+```
+
+Per request, you can override headers and timeout:
+> **Note:** `headers` values passed per request replace any matching header keys, including defaults such as auth/subscription headers.
+```php
+$client->get('PickupLocations', [], null, [
+    'headers' => [
+        'X-Correlation-ID' => '12345',
+        'Content-Type' => 'application/json; charset=utf-8',
+    ],
+    'timeout' => 10,
+]);
+```
+
 # Official UrgentCargus Documentation
 https://urgentcargus.portal.azure-api.net

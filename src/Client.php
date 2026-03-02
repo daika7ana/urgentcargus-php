@@ -9,6 +9,8 @@ use GuzzleHttp\Exception\GuzzleException;
 use MNIB\UrgentCargus\Exception\ClientException as UrgentCargusClientException;
 use MNIB\UrgentCargus\Exception\InvalidSubscriptionException;
 use MNIB\UrgentCargus\Exception\InvalidTokenException;
+use function array_replace;
+use function array_replace_recursive;
 use function json_decode;
 use function sprintf;
 use function trigger_error;
@@ -25,7 +27,7 @@ class Client implements ClientInterface
     /** @var string|null */
     private $accessToken;
 
-    public function __construct(string $apiKey, ?string $apiUri = null)
+    public function __construct(string $apiKey, ?string $apiUri = null, array $config = [])
     {
         if ($apiKey === '') {
             throw new InvalidSubscriptionException('The UrgentCargus API needs a subscription key.');
@@ -34,8 +36,7 @@ class Client implements ClientInterface
         $this->apiKey = $apiKey;
         $baseUri = $apiUri !== null && $apiUri !== '' ? $apiUri : self::API_URI;
 
-        $this->httpClient = new HttpClient([
-            'base_uri' => $baseUri,
+        $httpClientConfig = array_replace_recursive([
             'timeout' => 60,
             'allow_redirects' => false,
             'headers' => [
@@ -43,13 +44,16 @@ class Client implements ClientInterface
                 'Content-Type' => 'application/json',
                 'Accept-Charset' => 'utf-8',
             ],
-        ]);
+        ], $config);
+        $httpClientConfig['base_uri'] = $baseUri;
+
+        $this->httpClient = new HttpClient($httpClientConfig);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function request(string $method, string $endpoint, array $params = [], ?string $token = null)
+    public function request(string $method, string $endpoint, array $params = [], ?string $token = null, array $options = [])
     {
         $headers = [
             'Ocp-Apim-Subscription-Key' => $this->apiKey,
@@ -63,11 +67,20 @@ class Client implements ClientInterface
             $headers['Authorization'] = 'Bearer ' . $this->accessToken;
         }
 
+        if (isset($options['headers']) && \is_array($options['headers'])) {
+            $headers = array_replace($headers, $options['headers']);
+            unset($options['headers']);
+        }
+
+        unset($options['json']);
+
+        $requestOptions = array_replace([
+            'headers' => $headers,
+            'json' => $params,
+        ], $options);
+
         try {
-            $response = $this->httpClient->request($method, $endpoint, [
-                'headers' => $headers,
-                'json' => $params,
-            ]);
+            $response = $this->httpClient->request($method, $endpoint, $requestOptions);
 
             $contents = (string)$response->getBody();
         } catch (GuzzleException $exception) {
@@ -80,33 +93,33 @@ class Client implements ClientInterface
     /**
      * {@inheritdoc}
      */
-    public function get(string $endpoint, array $params = [], ?string $token = null)
+    public function get(string $endpoint, array $params = [], ?string $token = null, array $options = [])
     {
-        return $this->request('GET', $endpoint, $params, $token);
+        return $this->request('GET', $endpoint, $params, $token, $options);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function post(string $endpoint, array $params = [], ?string $token = null)
+    public function post(string $endpoint, array $params = [], ?string $token = null, array $options = [])
     {
-        return $this->request('POST', $endpoint, $params, $token);
+        return $this->request('POST', $endpoint, $params, $token, $options);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function put(string $endpoint, array $params = [], ?string $token = null)
+    public function put(string $endpoint, array $params = [], ?string $token = null, array $options = [])
     {
-        return $this->request('PUT', $endpoint, $params, $token);
+        return $this->request('PUT', $endpoint, $params, $token, $options);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function delete(string $endpoint, array $params = [], ?string $token = null)
+    public function delete(string $endpoint, array $params = [], ?string $token = null, array $options = [])
     {
-        return $this->request('DELETE', $endpoint, $params, $token);
+        return $this->request('DELETE', $endpoint, $params, $token, $options);
     }
 
     public function getToken(string $username, string $password): string
